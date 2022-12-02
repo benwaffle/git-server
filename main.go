@@ -107,31 +107,13 @@ func main() {
 
 			faketty := SidebandTTY{mux: mux}
 			output := termenv.NewOutput(faketty, termenv.WithProfile(termenv.TrueColor))
+			output.AltScreen()
+			output.HideCursor()
 
 			render := func() {
-				output.HideCursor()
-				output.WriteString("\n")
+				output.Write([]byte{'\n'}) // git won't print the data until it sees \r or \n
 				flushHttp(w)
 			}
-
-			// output.ClearScreen()
-			// output.MoveCursor(10, 10)
-			// output.WriteString(
-			// 	output.String("hello git").Bold().Foreground(output.Color("#abcdef")).String(),
-			// )
-			// output.CursorDown(10)
-			// output.WriteString("\n")
-			// flushHttp(w)
-			// time.Sleep(1 * time.Second)
-
-			// output.ClearScreen()
-			// output.WriteString(
-			// 	output.String("bye git").Bold().Foreground(output.Color("#abcdef")).String(),
-			// )
-			// output.CursorDown(10)
-			// output.WriteString("\n")
-			// flushHttp(w)
-			// time.Sleep(1 * time.Second)
 
 			progress := progress.New(progress.WithDefaultGradient())
 
@@ -147,16 +129,11 @@ func main() {
 				time.Sleep(40 * time.Millisecond)
 			}
 
-			// for i := 0; i <= 200; i += 1 {
-			// 	mux.WriteChannel(sideband.ProgressMessage, []byte(fmt.Sprintf("%d\n", i)))
+			output.ClearScreen()
 
-			// 	if f, ok := w.(http.Flusher); ok {
-			// 		log.Printf("flushing - %d", i)
-			// 		f.Flush()
-			// 	}
-			// 	time.Sleep(10 * time.Millisecond)
-			// }
-
+			output.ShowCursor()
+			output.ExitAltScreen()
+			output.Write([]byte{'\n'})
 			pkt.Flush()
 
 			pkt.Encodef("done\n")
